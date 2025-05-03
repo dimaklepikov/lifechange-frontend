@@ -1,5 +1,7 @@
+// src/App.tsx
+
 import { useState } from "react"
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
+import { Routes, Route, Link, useNavigate } from "react-router-dom"
 import Login from "./auth/Login"
 import Register from "./auth/Register"
 import Profile from "./pages/Profile"
@@ -15,14 +17,16 @@ import {
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"))
+  const navigate = useNavigate()
 
   const logout = () => {
     localStorage.removeItem("token")
     setToken(null)
+    navigate("/login?logged_out=1")
   }
 
   return (
-    <BrowserRouter>
+    <>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -46,7 +50,7 @@ function App() {
           <Route path="/tasks" element={<Tasks />} />
         </Routes>
       </Container>
-    </BrowserRouter>
+    </>
   )
 }
 
