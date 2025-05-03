@@ -1,22 +1,42 @@
 import { useState } from "react"
 import { TextField, Button, Card, CardContent, Typography, Stack, Snackbar, Alert } from "@mui/material"
+import { useNavigate } from "react-router-dom"
 import api from "../api/axios"
 
-function Register() {
+function Register({ setToken }: { setToken: (val: string) => void }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [success, setSuccess] = useState(false)
+  const [name, setName] = useState("")
   const [error, setError] = useState(false)
+  const navigate = useNavigate()
 
   const register = async () => {
     try {
+      // 👤 Регистрируем пользователя
       await api.post("/auth/register", {
         email,
-        password
+        password,
+        name,
       })
-      setSuccess(true)
+
+      // 🔐 Сразу логиним
+      const form = new URLSearchParams()
+      form.append("username", email) // FastAPI Users требует "username"
+      form.append("password", password)
+
+      const res = await api.post("/auth/jwt/login", form.toString(), {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+
+      localStorage.setItem("token", res.data.access_token)
+      setToken(res.data.access_token)
+
+      // ✅ Перенаправляем
+      navigate("/tasks")
     } catch (err) {
-      console.error("Registration error:", err)
+      console.error("Registration/Login error:", err)
       setError(true)
     }
   }
@@ -29,8 +49,8 @@ function Register() {
           <Stack spacing={2} mt={2}>
             <TextField
               label="Email"
-              fullWidth
               type="email"
+              fullWidth
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -41,6 +61,12 @@ function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <TextField
+              label="Name"
+              fullWidth
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <Button variant="contained" onClick={register}>
               Register
             </Button>
@@ -49,24 +75,13 @@ function Register() {
       </Card>
 
       <Snackbar
-        open={success}
-        autoHideDuration={4000}
-        onClose={() => setSuccess(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}  // 👈 Центр внизу
-      >
-        <Alert severity="success" onClose={() => setSuccess(false)}>
-          Registered! You can now login.
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
         open={error}
         autoHideDuration={4000}
         onClose={() => setError(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}  // 👈 Центр внизу
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert severity="error" onClose={() => setError(false)}>
-          Registration failed.
+          Registration or login failed.
         </Alert>
       </Snackbar>
     </>

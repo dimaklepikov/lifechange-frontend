@@ -41,7 +41,7 @@ function App() {
       <Container sx={{ mt: 4 }}>
         <Routes>
           <Route path="/login" element={<Login setToken={setToken} />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<Register setToken={setToken} />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/tasks" element={<Tasks />} />
         </Routes>
