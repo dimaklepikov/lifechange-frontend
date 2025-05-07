@@ -32,14 +32,26 @@ function Profile() {
   }
 
   const handleSave = async () => {
-    try {
-      const res = await api.put("/users/me", form)
-      setUser(res.data)
-      setEditMode(false)
-    } catch (err) {
-      console.error("Ошибка при обновлении профиля", err)
+  try {
+    const payload: Record<string, any> = {}
+
+    for (const [key, value] of Object.entries(form)) {
+      if (["weight", "height"].includes(key)) {
+        payload[key] = value === "" ? null : parseFloat(value)
+      } else if (["age"].includes(key)) {
+        payload[key] = value === "" ? null : parseInt(value)
+      } else {
+        payload[key] = value
+      }
     }
+
+    const res = await api.patch("/users/me", payload)
+    setUser(res.data)
+    setEditMode(false)
+  } catch (err) {
+    console.error("Ошибка при обновлении профиля", err)
   }
+}
 
   if (!user) {
     return (
