@@ -42,7 +42,6 @@ function Login({ setToken }: { setToken: (val: string) => void }) {
 
       localStorage.setItem("token", res.data.access_token)
       setToken(res.data.access_token)
-      // ✅ Перенаправляем
       navigate("/tasks")
     } catch (err) {
       setError("Ошибка входа: проверьте данные")
